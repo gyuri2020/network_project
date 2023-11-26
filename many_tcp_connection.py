@@ -15,11 +15,13 @@ class ManyTCPConnectionTopology(Topo):
 
         self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.01)
 
-def iperf_client(host, server_ip, port):
-    print(f"Start iperf -c {server_ip} -p {port} -t 10")
-    result = host.cmd(f"iperf -c {server_ip} -p {port} -t 10")
-    print(f"End iperf -c {server_ip} -p {port} -t 10")
-    info(result)
+def iperf_client(net, host, server, port):
+    print(f"Start")
+    #result = host.cmd(f"iperf -c {server_ip} -p {port} -t 10")
+    s_bw, c_bw = net.iperf([host, server], seconds=10, port=port)
+    info(s_bw)
+    print(f"End iperf")
+
 
 def main():
     topo = ManyTCPConnectionTopology()
@@ -48,11 +50,10 @@ def main():
 
         info(f"Link {i+1} - Bandwidth: {bw}, Delay: {delay}, Loss: {loss}\n")
 
-    # 서버에서 iperf 유지
-    server.cmd(f"iperf -s -p {server_port} &")
+
 
     time.sleep(5) 
-    print("Start Client iperf3")
+    print("Start Client iperf")
 
     # 클라이언트들이 동시에 서버에 10초간 패킷을 전송
     for client, port in clients:

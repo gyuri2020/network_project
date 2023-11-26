@@ -45,7 +45,7 @@ def main():
 
     clients = []
     threads = []
-    for i in range(1):
+    for i in range(64):
         h = net.addHost(f'h{i+1}', cls=Host, defaultRoute=None)
         link = net.addLink(h, net.get('s1'), cls=TCLink, delay='0.1ms', loss=0.01)
         h.setIP(intf=f'h{i+1}-eth0', ip=f"10.0.0.{i+2}/24")

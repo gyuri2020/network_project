@@ -10,7 +10,7 @@ def handle_client(connectionSocket, addr):
         message = connectionSocket.recv(2048).decode() # always use thread for multiple client
         modifiedMessage = message.upper()
         cnt += 1
-        if cnt == 10000: # for test
+        if cnt == 100: # for test
             modifiedMessage = "EXIT"
         connectionSocket.send(modifiedMessage.encode())
         if modifiedMessage == "EXIT":
