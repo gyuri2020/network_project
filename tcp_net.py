@@ -47,7 +47,7 @@ def main():
 
     clients = []
     threads = []
-    for i in range(1, 65):
+    for i in range(1, 200):
         h = net.getNodeByName(f'h{i}')
         h.setIP(intf=f'h{i}-eth0', ip=f"10.0.0.{i+1}/24")
         clients.append(h) 
