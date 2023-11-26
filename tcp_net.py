@@ -9,6 +9,7 @@ import socket
 import time
 import threading
 import re
+import numpy as np
 
 
 outputs = []
@@ -40,7 +41,7 @@ def ifconfigTest(node, elapsed):
         rx_bytes = int(packet_dict["rx_bytes"])
         tx_bytes = int(packet_dict["tx_bytes"])
         total_bytes = rx_bytes + tx_bytes
-        bw = 10 #10Mbps
+        bw = 1 #1Mbps
         link_util = total_bytes * 8 / (bw * 1000000 * elapsed)
         print(f"{node.name} link_util: {link_util}")
         link_util_dict[node.name] = link_util
@@ -52,11 +53,11 @@ class ManyTCPConnectionTopology(Topo):
         server = self.addHost('server', cls=Host, defaultRoute=None)
         switch = self.addSwitch('s1', cls=OVSKernelSwitch, failMode='standalone')
 
-        self.addLink(server, switch, cls=TCLink, bw=10, delay='0.1ms', loss=0.3)
+        self.addLink(server, switch, cls=TCLink, bw=1, delay='0.1ms', loss=0.3)
 
         for i in range(1, 201):
             host = self.addHost(f'h{i}', cls=Host, defaultRoute=None)
-            self.addLink(host, switch, cls=TCLink, bw=10, delay='0.1ms', loss=0.3)
+            self.addLink(host, switch, cls=TCLink, bw=1, delay='0.1ms', loss=0.3)
 
 
 
@@ -126,8 +127,15 @@ def main():
     print(f"avg rttmax: {avg_rttmax}")
     print(f"avg rttdev: {avg_rttdev}")
 
+    client_link_util = []
     for name, link_util in link_util_dict.items():
         print(f"{name} link_util: {link_util}")
+        if name != "server":
+            client_link_util.append(link_util)
+    avg_client_link_util = sum(client_link_util) / len(client_link_util)
+    std_client_link_util = np.std(np.array(client_link_util))
+    print(f"avg client link_util: {avg_client_link_util}")
+    print(f"std client link_util: {std_client_link_util}")
     net.stop()
 
 if __name__ == '__main__':
