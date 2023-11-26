@@ -15,11 +15,9 @@ class ManyTCPConnectionTopology(Topo):
         self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.01)
 
 def iperf_client(host, server_ip, port):
-    host.cmd(f"iperf -c {server_ip} -p {port} -t 10")
-
-def measure_connection(net, client, server_ip):
-    bw_result = net.iperf([client, net.getNodeByName('server')], seconds=10)
-    info(f"{client} {bw_result}")
+    result = host.cmd(f"iperf -c {server_ip} -p {port} -t 10")
+    bandwidth = result.split()[-2] if 'Mbits/sec' in result else '0.0'  # 대역폭 추출
+    info(f"Host {host.name}: Bandwidth - {bandwidth} Mbits/sec\n")
 
 def main():
     topo = ManyTCPConnectionTopology()
@@ -50,7 +48,7 @@ def main():
     # 서버에서 iperf 유지
     server.cmd(f"iperf -s -p {server_port} &")
 
-    # 각 connection의 대역폭, 손실률, RTT 계산
+    # 클라이언트들이 동시에 서버에 10초간 패킷을 전송
     for client in clients:
         thread = threading.Thread(target=iperf_client, args=(client, server_ip, server_port))
         threads.append(thread)
@@ -58,10 +56,6 @@ def main():
 
     for thread in threads:
         thread.join()
-
-    # 클라이언트에서 10초 동안만 실행 후 종료
-    for client in clients:
-        measure_connection(net, client, server_ip)
 
     CLI(net)
     net.stop()
