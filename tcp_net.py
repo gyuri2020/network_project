@@ -11,17 +11,21 @@ import threading
 
 
 outputs = []
-
+def ifconfigTest( net ):
+    "Run ifconfig on all hosts in net."
+    hosts = net.hosts
+    for host in hosts:
+        info( host.cmd( 'ifconfig' ) )
 class ManyTCPConnectionTopology(Topo):
     def build(self):
         server = self.addHost('server', cls=Host, defaultRoute=None)
         switch = self.addSwitch('s1', cls=OVSKernelSwitch, failMode='standalone')
 
-        self.addLink(server, switch, cls=TCLink, bw=1, delay='0.1ms', loss=0.3)
+        self.addLink(server, switch, cls=TCLink, bw=10, delay='0.1ms', loss=0.3)
 
         for i in range(1, 201):
             host = self.addHost(f'h{i}', cls=Host, defaultRoute=None)
-            self.addLink(host, switch, cls=TCLink, bw=1, delay='0.1ms', loss=0.3)
+            self.addLink(host, switch, cls=TCLink, bw=10, delay='0.1ms', loss=0.3)
 
 
 
@@ -82,6 +86,8 @@ def main():
     print(f"avg rttavg: {avg_rttavg}")
     print(f"avg rttmax: {avg_rttmax}")
     print(f"avg rttdev: {avg_rttdev}")
+
+    ifconfigTest(net)
 
     net.stop()
 
