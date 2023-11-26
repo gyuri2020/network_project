@@ -33,7 +33,7 @@ def main():
 
     clients = []
     threads = []
-    for i in range(64):
+    for i in range(1):
         h = net.addHost(f'h{i+1}', cls=Host, defaultRoute=None)
         port = server_port + i + 1  # 서로 다른 포트를 사용하도록 변경
         link = net.addLink(h, net.get('s1'), cls=TCLink, bw=int(f"{i+1}0"), delay='0.1ms', loss=0.01)
