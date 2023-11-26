@@ -36,7 +36,7 @@ void tcp_custom_cong_avoid_ai(struct tcp_sock *tp, u32 w, u32 acked)
 
 void tcp_custom_fast_recovery(struct tcp_sock *tp, u32 acked)
 {
-    tp->snd_cwnd_cnt += (acked+3);
+    tp->snd_cwnd_cnt += (acked+1);
 
     if (tp->snd_cwnd_cnt >= tp->snd_cwnd) {
         u32 extra_credits = tp->snd_cwnd_cnt / tp->snd_cwnd; 
@@ -45,8 +45,6 @@ void tcp_custom_fast_recovery(struct tcp_sock *tp, u32 acked)
     }
 
     tp->snd_cwnd = min(tp->snd_cwnd, tp->snd_cwnd_clamp);
-    tp->fr_frag = 0;
-
 }
 
 
@@ -63,7 +61,7 @@ void tcp_reno_cong_avoid(struct sock *sk, u32 ack, u32 acked)
         if (!acked)
             return;
     }
-    else if(tp->fr_frag){
+    else if(tp->snd_cwnd < 2*tp->snd_ssthresh){
         tcp_custom_fast_recovery(tp, acked);
     }
     else {
