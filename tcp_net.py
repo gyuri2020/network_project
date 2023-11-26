@@ -15,7 +15,7 @@ class ManyTCPConnectionTopology(Topo):
         server = self.addHost('server', cls=Host, defaultRoute=None)
         switch = self.addSwitch('s1', cls=OVSKernelSwitch, failMode='standalone')
 
-        self.addLink(server, switch, cls=TCLink, bw=10000000, delay='0.1ms', loss=0.01)
+        self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.01)
 
 
 
@@ -33,8 +33,6 @@ def main():
     net.start()
 
     server = net.getNodeByName('server')
-    server_port = 12000
-    server_ip = "10.0.0.1"
     server.setIP(intf="server-eth0", ip="10.0.0.1/24")
     #server.cmd(f'python3 server_tcp.py {server_ip} {server_port} &')
 
@@ -44,8 +42,9 @@ def main():
     threads = []
     for i in range(64):
         h = net.addHost(f'h{i+1}', cls=Host, defaultRoute=None)
-        link = net.addLink(h, net.get('s1'), cls=TCLink, bw=1000000, delay='0.1ms', loss=0.01)
+        link = net.addLink(h, net.get('s1'), cls=TCLink, bw=100, delay='0.1ms', loss=0.01)
         h.setIP(intf=f'h{i+1}-eth0', ip=f"10.0.0.{i+2}/24")
+        client.connect(server)
         clients.append(h)    
 
     for client in clients:
