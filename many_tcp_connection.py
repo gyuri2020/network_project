@@ -6,6 +6,7 @@ from mininet.node import Host
 from mininet.log import setLogLevel, info
 from mininet.link import TCLink
 import threading
+import time
 
 class ManyTCPConnectionTopology(Topo):
     def build(self):
@@ -34,7 +35,7 @@ def main():
     threads = []
     for i in range(64):
         h = net.addHost(f'h{i+1}', cls=Host, defaultRoute=None)
-        link = net.addLink(h, net.get('s1'), cls=TCLink, bw=int(f"{i}0"), delay='0.1ms', loss=0.01)
+        link = net.addLink(h, net.get('s1'), cls=TCLink, bw=int(f"{i+1}0"), delay='0.1ms', loss=0.01)
         h.setIP(intf=f'h{i+1}-eth0', ip=f"10.0.0.{i+2}/24")
         clients.append(h)
 
@@ -46,6 +47,8 @@ def main():
 
     # 서버에서 iperf 유지
     server.cmd(f"iperf -s -p {server_port} &")
+
+    time.sleep(5) 
 
     # 클라이언트들이 동시에 서버에 10초간 패킷을 전송
     for client in clients:
