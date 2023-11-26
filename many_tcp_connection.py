@@ -14,17 +14,12 @@ class ManyTCPConnectionTopology(Topo):
 
         self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.01)
 
-def measure_connection(net, client, server_ip):
-    client_bw, server_bw = net.iperf([client, net.getNodeByName('server')], seconds=10)
-    info(f"{client} {server_bw}")    
-    # client_loss = client.cmd(f"ping -c 10 {server_ip} | grep packet | awk '{{print $6}}'")
-    # server_loss = net.getNodeByName('server').cmd(f"ping -c 10 {client.IP()} | grep packet | awk '{{print $6}}'")
-    
-    # client_rtt = client.cmd(f"ping -c 10 {server_ip} | grep rtt | awk '{{print $4}}'")
-    # server_rtt = net.getNodeByName('server').cmd(f"ping -c 10 {client.IP()} | grep rtt | awk '{{print $4}}'")
+def iperf_client(host, server_ip, port):
+    host.cmd(f"iperf -c {server_ip} -p {port} -t 10")
 
-    # info(f"Client {client} to Server - Bandwidth: {client_bw}, Loss: {client_loss}, RTT: {client_rtt}")
-    # info(f"Server to Client {client} - Bandwidth: {server_bw}, Loss: {server_loss}, RTT: {server_rtt}")
+def measure_connection(net, client, server_ip):
+    bw_result = net.iperf([client, net.getNodeByName('server')], seconds=10)
+    info(f"{client} {bw_result}")
 
 def main():
     topo = ManyTCPConnectionTopology()
@@ -39,6 +34,7 @@ def main():
     server_port = 5001
 
     clients = []
+    threads = []
     for i in range(64):
         h = net.addHost(f'h{i+1}', cls=Host, defaultRoute=None)
         link = net.addLink(h, net.get('s1'), cls=TCLink, bw=int(f"{i}0"), delay='0.1ms', loss=0.01)
@@ -51,9 +47,21 @@ def main():
 
         info(f"Link {i+1} - Bandwidth: {bw}, Delay: {delay}, Loss: {loss}\n")
 
+    # 서버에서 iperf 유지
+    server.cmd(f"iperf -s -p {server_port} &")
+
     # 각 connection의 대역폭, 손실률, RTT 계산
     for client in clients:
-        threading.Thread(target=measure_connection, args=(net, client, server_ip)).start()
+        thread = threading.Thread(target=iperf_client, args=(client, server_ip, server_port))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    # 클라이언트에서 10초 동안만 실행 후 종료
+    for client in clients:
+        measure_connection(net, client, server_ip)
 
     CLI(net)
     net.stop()
