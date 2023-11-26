@@ -47,7 +47,7 @@ def main():
         info(f"Link {i+1} - Bandwidth: {bw}, Delay: {delay}, Loss: {loss}\n")
 
     # 서버에서 iperf 유지
-    server.cmd(f"iperf3 -s -p {server_port} &")
+    server.cmd(f"iperf3 -s -p {server_port} -t 30 &")
 
     time.sleep(5) 
 
