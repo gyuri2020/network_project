@@ -47,7 +47,7 @@ def main():
         info(f"Link {i+1} - Bandwidth: {bw}, Delay: {delay}, Loss: {loss}\n")
 
     # 서버에서 iperf 유지
-    server.cmd(f"iperf3 -s -p {server_port} -t 30 &")
+    server.cmd(f"iperf3 -s -p {server_port} &")
 
     time.sleep(5) 
 
@@ -59,6 +59,9 @@ def main():
 
     for thread in threads:
         thread.join()
+
+    # 서버에서 iperf3 종료
+    server.cmd("killall iperf3")
 
     CLI(net)
     net.stop()
