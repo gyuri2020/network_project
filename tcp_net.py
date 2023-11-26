@@ -123,7 +123,7 @@ def main():
     print(f"total sent: {total_sent}")
     print(f"total received: {total_received}")
     print(f"avg rttmin: {avg_rttmin}")
-    print(f"avg rttavg: {avg_rttavg}")
+    print(f"avg rttavg: {avg_rttavg}") #latency
     print(f"avg rttmax: {avg_rttmax}")
     print(f"avg rttdev: {avg_rttdev}")
 
@@ -134,8 +134,8 @@ def main():
             client_link_util.append(link_util)
     avg_client_link_util = sum(client_link_util) / len(client_link_util)
     std_client_link_util = np.std(np.array(client_link_util))
-    print(f"avg client link_util: {avg_client_link_util}")
-    print(f"std client link_util: {std_client_link_util}")
+    print(f"avg client link_util: {avg_client_link_util}") #link_util
+    print(f"std client link_util: {std_client_link_util}") #fairness
     net.stop()
 
 if __name__ == '__main__':
