@@ -28,7 +28,7 @@ class ManyTCPConnectionTopology(Topo):
 
 def ping_to_server(net, client, server):
 
-    result = client.cmd(f"ping -c10 {server.IP()}")
+    result = client.cmd(f"ping -c100 {server.IP()}")
     all_output = net._parsePingFull( result )
     outputs.append(list(all_output))
 
