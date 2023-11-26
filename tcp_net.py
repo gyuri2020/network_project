@@ -8,14 +8,45 @@ from mininet.link import TCLink
 import socket
 import time
 import threading
+import re
 
 
 outputs = []
-def ifconfigTest( net ):
-    "Run ifconfig on all hosts in net."
-    hosts = net.hosts
-    for host in hosts:
-        info( host.cmd( 'ifconfig' ) )
+link_util_dict = dict()
+
+
+def _parse_config(output):
+    interface_data = re.findall(
+        r"eth0.*?RX packets (\d+).*?bytes (\d+).*?TX packets (\d+).*?bytes (\d+)",
+        output,
+        re.DOTALL,
+    )
+
+    rx_packets, rx_bytes, tx_packets, tx_bytes = interface_data[0]
+    dict = {
+        "rx_packets": rx_packets,
+        "rx_bytes": rx_bytes,
+        "tx_packets": tx_packets,
+        "tx_bytes": tx_bytes,
+    }
+    return dict
+        
+
+
+def ifconfigTest(node, elapsed):
+
+        config_str = node.cmd( 'ifconfig' )
+        packet_dict = _parse_config(config_str)
+        rx_bytes = int(packet_dict["rx_bytes"])
+        tx_bytes = int(packet_dict["tx_bytes"])
+        total_bytes = rx_bytes + tx_bytes
+        bw = 10 #10Mbps
+        link_util = total_bytes * 8 / (bw * 1000000 * elapsed)
+        print(f"{node.name} link_util: {link_util}")
+        link_util_dict[node.name] = link_util
+
+
+
 class ManyTCPConnectionTopology(Topo):
     def build(self):
         server = self.addHost('server', cls=Host, defaultRoute=None)
@@ -32,9 +63,13 @@ class ManyTCPConnectionTopology(Topo):
 
 def ping_to_server(net, client, server):
 
+    start = time.time()
     result = client.cmd(f"ping -c100 {server.IP()}")
     all_output = net._parsePingFull( result )
     outputs.append(list(all_output))
+    end = time.time()
+    elapsed = end - start
+    ifconfigTest(client, elapsed)
 
 
 def main():
@@ -62,8 +97,12 @@ def main():
         threads.append(t)
         t.start()
 
+    start = time.time()
     for t in threads:
         t.join()
+    end = time.time()
+    elapsed = end - start
+    ifconfigTest(server, elapsed)
     
     sent, received, rttmin, rttavg, rttmax, rttdev = [], [], [], [], [], []
     for output in outputs:
@@ -87,8 +126,8 @@ def main():
     print(f"avg rttmax: {avg_rttmax}")
     print(f"avg rttdev: {avg_rttdev}")
 
-    ifconfigTest(net)
-
+    for name, link_util in link_util_dict.items():
+        print(f"{name} link_util: {link_util}")
     net.stop()
 
 if __name__ == '__main__':
