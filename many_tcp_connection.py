@@ -16,7 +16,7 @@ class ManyTCPConnectionTopology(Topo):
         self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.01)
 
 def iperf_client(host, server_ip, port):
-    result = host.cmd(f"iperf -c {server_ip} -p {port} -t 10")
+    result = host.cmd(f"iperf3 -c {server_ip} -p {port} -t 10")
     info(result)
 
 def main():
@@ -47,7 +47,7 @@ def main():
         info(f"Link {i+1} - Bandwidth: {bw}, Delay: {delay}, Loss: {loss}\n")
 
     # 서버에서 iperf 유지
-    server.cmd(f"iperf -s -p {server_port} &")
+    server.cmd(f"iperf3 -s -p {server_port} &")
 
     time.sleep(5) 
 
