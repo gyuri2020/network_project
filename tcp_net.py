@@ -19,7 +19,7 @@ class ManyTCPConnectionTopology(Topo):
 
         self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.3)
 
-        for i in range(1, 65):
+        for i in range(1, 400):
             host = self.addHost(f'h{i}', cls=Host, defaultRoute=None)
             self.addLink(host, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.3)
 
