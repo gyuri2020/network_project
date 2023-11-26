@@ -17,17 +17,17 @@ class ManyTCPConnectionTopology(Topo):
         server = self.addHost('server', cls=Host, defaultRoute=None)
         switch = self.addSwitch('s1', cls=OVSKernelSwitch, failMode='standalone')
 
-        self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.01)
+        self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.3)
 
         for i in range(1, 65):
             host = self.addHost(f'h{i}', cls=Host, defaultRoute=None)
-            self.addLink(host, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.01)
+            self.addLink(host, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.3)
 
 
 
 
 def ping_to_server(net, client, server):
-    print(f"{client.IP()} -> s{server.IP()}")
+
     result = client.cmd(f"ping -c1 {server.IP()}")
     all_output = net._parsePingFull( result )
     outputs.append(list(all_output))
