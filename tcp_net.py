@@ -18,7 +18,13 @@ class ManyTCPConnectionTopology(Topo):
         self.addLink(server, switch, cls=TCLink, bw=10000000, delay='0.1ms', loss=0.01)
 
 
+
+def ping_to_server(net, client, server):
     
+    result = client.cmd(f"ping -c1 {server.IP()}")
+    all_output = net._parsePingFull( result )
+    print(all_output)
+
 
 def main():
     topo = ManyTCPConnectionTopology()
@@ -42,11 +48,14 @@ def main():
         h.setIP(intf=f'h{i+1}-eth0', ip=f"10.0.0.{i+2}/24")
         clients.append(h)    
 
-   
+    for client in clients:
+        t = threading.Thread(target=ping_to_server, args=(net, client, server))
+        threads.append(t)
+        t.start()
 
+    for t in threads:
+        t.join()
 
-
-    net.pingAll()
 
     net.stop()
 
