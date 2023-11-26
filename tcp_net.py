@@ -7,47 +7,58 @@ from mininet.log import setLogLevel, info
 from mininet.link import Link, TCLink
 import socket
 import time
+import threading
 
 
-class SimpleTopology(Topo):
+
+class ManyTCPConnectionTopology(Topo):
     def build(self):
-        h1 = self.addHost('h1')
-        h2 = self.addHost('h2')
-        s1 = self.addSwitch('s1')
-        self.addLink(h1, s1)
-        self.addLink(h2, s1)
+        server = self.addHost('server', cls=Host, defaultRoute=None)
+        switch = self.addSwitch('s1', cls=OVSKernelSwitch, failMode='standalone')
+
+        self.addLink(server, switch, cls=TCLink, delay='0.1ms', loss=0.01)
 
 
+def connect_with_server(client, server_ip, server_port):
+    start_time = time.time()
+    client.cmd(f'python3 client_tcp.py {server_ip} {server_port}')
+    end_time = time.time()
+    rtt = (end_time - start_time) * 1000
+    print("Round-trip time: {0:.2f} ms".format(rtt))
 
 
 def main():
-    topo = SimpleTopology()
-    net = Mininet( topo=topo)
+
+    topo = ManyTCPConnectionTopology()
+    net = Mininet(topo=topo, autoSetMacs=True, build=False, ipBase="10.0.0.0/24")
 
     net.start()
 
-    h1 = net.get('h1')
-    h2 = net.get('h2')
+    server = net.getNodeByName('server')
+    server_port = 12000
+    server_ip = "10.0.0.1"
+    server.setIP(intf="server-eth0", ip="10.0.0.1/24")
+    server.cmd(f'python3 server_tcp.py {server_ip} {server_port} &')
 
-    h2.cmd(f'python3 server_tcp.py 10.0.0.2 12000 &')
-
-    time.sleep(1)
-
-    start_time = time.time()
-
-    result = h1.cmd('python3 client_tcp.py 10.0.0.2 12000')
-    
-
-    end_time = time.time()
+    time.sleep(3)
 
 
-    rtt = (end_time - start_time) * 1000
-    print("Round-trip time: {0:.2f} ms".format(rtt))
-    print(result)
+    clients = []
+    threads = []
+    for i in range(1):
+        h = net.addHost(f'h{i+1}', cls=Host, defaultRoute=None)
+        link = net.addLink(h, net.get('s1'), cls=TCLink, delay='0.1ms', loss=0.01)
+        h.setIP(intf=f'h{i+1}-eth0', ip=f"10.0.0.{i+2}/24")
+        clients.append(h)    
 
+    for client in clients:
+        thread = threading.Thread(target=connect_with_server, args=(client, server_ip, server_port))
+        threads.append(thread)
+        thread.start()
 
-
-
+    for thread in threads:
+        print("Join Thread")
+        thread.join()
 
     net.stop()
 

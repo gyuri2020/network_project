@@ -4,9 +4,7 @@ import sys
 
 
 def tcp_client(serverIP, serverPort):
-    print("TCP client")
-    print("Server IP: ", serverIP)
-    print("Server Port: ", serverPort)
+    
     clientSocket = socket(AF_INET, SOCK_STREAM)
     clientSocket.connect((serverIP, serverPort)) #only tcp, not udp
 
@@ -14,7 +12,7 @@ def tcp_client(serverIP, serverPort):
         message = "hello"
         clientSocket.send(message.encode())
         modifiedMessage = clientSocket.recv(2048).decode()
-        print(modifiedMessage)
+
         if modifiedMessage == "EXIT":
             break
 

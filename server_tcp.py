@@ -10,7 +10,7 @@ def handle_client(connectionSocket, addr):
         message = connectionSocket.recv(2048).decode() # always use thread for multiple client
         modifiedMessage = message.upper()
         cnt += 1
-        if cnt == 10: # for test
+        if cnt == 10000: # for test
             modifiedMessage = "EXIT"
         connectionSocket.send(modifiedMessage.encode())
         if modifiedMessage == "EXIT":
@@ -19,9 +19,7 @@ def handle_client(connectionSocket, addr):
     return 
 
 def tcp_server(serverIP, serverPort):
-    print("TCP server")
-    print("Server IP: ", serverIP)
-    print("Server Port: ", serverPort)
+
     serverSocket = socket(AF_INET, SOCK_STREAM) #TCP
     serverSocket.bind((serverIP, serverPort))
     serverSocket.listen(1)
