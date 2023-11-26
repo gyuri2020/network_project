@@ -12,7 +12,7 @@ class ManyTCPConnectionTopology(Topo):
         server = self.addHost('server', cls=Host, defaultRoute=None)
         switch = self.addSwitch('s1', cls=OVSKernelSwitch, failMode='standalone')
 
-        self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0)
+        self.addLink(server, switch, cls=TCLink, bw=10000000, delay='0.1ms', loss=0.01)
 
 def iperf_client(host, server_ip, port):
     host.cmd(f"iperf -c {server_ip} -p {port} -t 10 &")
@@ -32,7 +32,7 @@ def main():
 
     for i in range(64):
         h = net.addHost(f'h{i+1}', cls=Host, defaultRoute=None)
-        link = net.addLink(h, net.get('s1'), cls=TCLink, bw=1000, delay='0.1ms', loss=0)
+        link = net.addLink(h, net.get('s1'), cls=TCLink, bw=int(f"{i}0000"), delay='0.1ms', loss=0.01)
         h.setIP(intf=f'h{i+1}-eth0', ip=f"10.0.0.{i+2}/24")
         threading.Thread(target=iperf_client, args=(h, server_ip, server_port)).start()
         
