@@ -55,7 +55,10 @@ def main():
 
     for t in threads:
         t.join()
-
+    
+    src, dst = net.hosts[0], net.hosts[1]
+    s_bw, c_bw = net.iperf([src, dst], seconds=10)
+    info(s_bw)
 
     net.stop()
 
