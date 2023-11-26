@@ -23,7 +23,7 @@ if __name__ == '__main__':
     info( "*** Initializing Mininet and kernel modules\n" )
     OVSKernelSwitch.setup()
     info( "*** Creating network\n" )
-    network = Mininet( TreeTopo( depth=2, fanout=2), switch=OVSKernelSwitch,
+    network = Mininet( TreeTopo( depth=2, fanout=4), switch=OVSKernelSwitch,
                        waitConnected=True )
     info( "*** Starting network\n" )
     network.start()
