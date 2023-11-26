@@ -35,9 +35,10 @@ def main():
     threads = []
     for i in range(64):
         h = net.addHost(f'h{i+1}', cls=Host, defaultRoute=None)
+        port = server_port + i + 1  # 서로 다른 포트를 사용하도록 변경
         link = net.addLink(h, net.get('s1'), cls=TCLink, bw=int(f"{i+1}0"), delay='0.1ms', loss=0.01)
         h.setIP(intf=f'h{i+1}-eth0', ip=f"10.0.0.{i+2}/24")
-        clients.append(h)
+        clients.append((h, port))
 
         bw = link.intf1.params['bw']
         delay = link.intf1.params['delay']
@@ -51,8 +52,8 @@ def main():
     time.sleep(5) 
 
     # 클라이언트들이 동시에 서버에 10초간 패킷을 전송
-    for client in clients:
-        thread = threading.Thread(target=iperf_client, args=(client, server_ip, server_port))
+    for client, port in clients:
+        thread = threading.Thread(target=iperf_client, args=(client, server_ip, port))
         threads.append(thread)
         thread.start()
 
