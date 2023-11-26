@@ -16,7 +16,9 @@ class ManyTCPConnectionTopology(Topo):
         self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.01)
 
 def iperf_client(host, server_ip, port):
+    print(f"Start iperf3 -c {server_ip} -p {port} -t 10")
     result = host.cmd(f"iperf3 -c {server_ip} -p {port} -t 10")
+    print(f"End iperf3 -c {server_ip} -p {port} -t 10")
     info(result)
 
 def main():
@@ -58,10 +60,13 @@ def main():
         thread = threading.Thread(target=iperf_client, args=(client, server_ip, port))
         threads.append(thread)
         thread.start()
+        
 
     for thread in threads:
+        print("Join Thread")
         thread.join()
 
+    print("End Client iperf3")
     # 서버에서 iperf3 종료
     server.cmd("killall iperf3")
 
