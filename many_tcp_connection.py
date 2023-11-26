@@ -12,14 +12,10 @@ class ManyTCPConnectionTopology(Topo):
         server = self.addHost('server', cls=Host, defaultRoute=None)
         switch = self.addSwitch('s1', cls=OVSKernelSwitch, failMode='standalone')
 
-        self.addLink(server, switch, cls=TCLink, bw=10000000, delay='0.1ms', loss=0.01)
-
-def iperf_client(host, server_ip, port, bandwidth):
-    host.cmd(f"iperf -c {server_ip} -p {port} -t 10 &")
+        self.addLink(server, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.01)
 
 def measure_connection(net, client, server_ip):
-    client_bw, _ = net.iperf([client, net.getNodeByName('server')], seconds=10)
-    server_bw, _ = net.iperf([net.getNodeByName('server'), client], seconds=10)
+    client_bw, server_bw = net.iperf([client, net.getNodeByName('server')], seconds=10)
     
     client_loss = client.cmd(f"ping -c 10 {server_ip} | grep packet | awk '{{print $6}}'")
     server_loss = net.getNodeByName('server').cmd(f"ping -c 10 {client.IP()} | grep packet | awk '{{print $6}}'")
@@ -45,10 +41,9 @@ def main():
     clients = []
     for i in range(64):
         h = net.addHost(f'h{i+1}', cls=Host, defaultRoute=None)
-        link = net.addLink(h, net.get('s1'), cls=TCLink, bw=int(f"{i}0000"), delay='0.1ms', loss=0.01)
+        link = net.addLink(h, net.get('s1'), cls=TCLink, bw=int(f"{i}0"), delay='0.1ms', loss=0.01)
         h.setIP(intf=f'h{i+1}-eth0', ip=f"10.0.0.{i+2}/24")
         clients.append(h)
-        threading.Thread(target=iperf_client, args=(h, server_ip, server_port, f"{i}0000")).start()
 
         bw = link.intf1.params['bw']
         delay = link.intf1.params['delay']
