@@ -4,36 +4,27 @@ from mininet.node import OVSKernelSwitch
 from mininet.cli import CLI
 from mininet.node import Host
 from mininet.log import setLogLevel, info
-from mininet.link import Link, TCLink
-import socket
-import time
+from mininet.link import TCLink
 
-
-class SimpleTopology(Topo):
+class ManyHostsTopology(Topo):
     def build(self):
-        h1 = self.addHost('h1', cls=Host, defaultRoute=None)
-        h2 = self.addHost('h2', cls=Host, defaultRoute=None)
-        s1 = self.addSwitch( 's1', cls=OVSKernelSwitch, failMode='standalone')
-        self.addLink(h1, s1, cls=TCLink, bw=10000000, delay='0.1ms', loss=0.1)
+        switch = self.addSwitch('s1', cls=OVSKernelSwitch, failMode='standalone')
         
-        self.addLink(h2, s1, cls=TCLink, bw=10000000, delay='0.1ms')
-        #self.addLink(h2, s1)
-
-
+        for i in range(1, 65):
+            host = self.addHost(f'h{i}', cls=Host, defaultRoute=None)
+            self.addLink(host, switch, cls=TCLink, bw=1000, delay='0.1ms', loss=0.1)
 
 def main():
-    topo = SimpleTopology()
-    net = Mininet( topo=topo, autoSetMacs=True, build=False, ipBase="10.0.0.0/24")
+    topo = ManyHostsTopology()
+    net = Mininet(topo=topo, autoSetMacs=True, build=False, ipBase="10.0.0.0/24")
 
-#    net.build()
     net.start()
 
-    h1 = net.getNodeByName('h1')
-    h2 = net.getNodeByName('h2')
+    # 호스트 IP 설정
+    for i in range(1, 65):
+        host = net.getNodeByName(f'h{i}')
+        host.setIP(intf=f'h{i}-eth0', ip=f"10.0.0.{i}/24")
 
-    h1.setIP(intf="h1-eth0", ip="10.0.0.1/24")
-    h2.setIP(intf="h2-eth0", ip="10.0.0.2/24")
-    src, dst = net.hosts[0], net.hosts[1]
     net.pingAll()
     CLI(net)
     net.stop()
