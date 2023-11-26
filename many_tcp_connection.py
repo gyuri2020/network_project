@@ -16,8 +16,7 @@ class ManyTCPConnectionTopology(Topo):
 
 def iperf_client(host, server_ip, port):
     result = host.cmd(f"iperf -c {server_ip} -p {port} -t 10")
-    bandwidth = result.split()[-2] if 'Mbits/sec' in result else '0.0'  # 대역폭 추출
-    info(f"Host {host.name}: Bandwidth - {bandwidth} Mbits/sec\n")
+    info(f"Host {host.name}: \n\n{result}\n\n")
 
 def main():
     topo = ManyTCPConnectionTopology()
