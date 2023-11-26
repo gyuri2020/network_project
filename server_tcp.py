@@ -19,6 +19,9 @@ def handle_client(connectionSocket, addr):
     return 
 
 def tcp_server(serverIP, serverPort):
+    print("TCP server")
+    print("Server IP: ", serverIP)
+    print("Server Port: ", serverPort)
     serverSocket = socket(AF_INET, SOCK_STREAM) #TCP
     serverSocket.bind((serverIP, serverPort))
     serverSocket.listen(1)
