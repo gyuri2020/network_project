@@ -43,7 +43,6 @@ def ifconfigTest(node, elapsed):
         total_bytes = rx_bytes + tx_bytes
         bw = 1 #1Mbps
         link_util = total_bytes * 8 / (bw * 1000000 * elapsed)
-        print(f"{node.name} link_util: {link_util}")
         link_util_dict[node.name] = link_util
 
 
@@ -129,11 +128,11 @@ def main():
 
     client_link_util = []
     for name, link_util in link_util_dict.items():
-        print(f"{name} link_util: {link_util}")
         if name != "server":
             client_link_util.append(link_util)
     avg_client_link_util = sum(client_link_util) / len(client_link_util)
     std_client_link_util = sum([(x - avg_client_link_util) ** 2 for x in client_link_util]) / len(client_link_util)
+    print(f"server link_util: {link_util_dict['server']}")
     print(f"avg client link_util: {avg_client_link_util}") #link_util
     print(f"std client link_util: {std_client_link_util}") #fairness
     net.stop()
