@@ -10,6 +10,8 @@ import time
 import threading
 
 
+outputs = []
+
 class ManyTCPConnectionTopology(Topo):
     def build(self):
         server = self.addHost('server', cls=Host, defaultRoute=None)
@@ -27,9 +29,8 @@ class ManyTCPConnectionTopology(Topo):
 def ping_to_server(net, client, server):
     print(f"{client.IP()} -> s{server.IP()}")
     result = client.cmd(f"ping -c1 {server.IP()}")
-    print(result)
     all_output = net._parsePingFull( result )
-    print(all_output)
+    outputs.append(list(all_output))
 
 
 def main():
@@ -60,9 +61,27 @@ def main():
     for t in threads:
         t.join()
     
-    src, dst = net.hosts[0], net.hosts[1]
-    s_bw, c_bw = net.iperf([src, dst], seconds=10)
-    info(s_bw)
+    sent, received, rttmin, rttavg, rttmax, rttdev = [], [], [], [], [], []
+    for output in outputs:
+        sent.append(output[0])
+        received.append(output[1])
+        rttmin.append(output[2])
+        rttavg.append(output[3])
+        rttmax.append(output[4])
+        rttdev.append(output[5])
+
+    total_sent = sum(sent)
+    total_received = sum(received)
+    avg_rttmin = sum(rttmin) / len(rttmin)
+    avg_rttavg = sum(rttavg) / len(rttavg)
+    avg_rttmax = sum(rttmax) / len(rttmax)
+    avg_rttdev = sum(rttdev) / len(rttdev)
+    print(f"total sent: {total_sent}")
+    print(f"total received: {total_received}")
+    print(f"avg rttmin: {avg_rttmin}")
+    print(f"avg rttavg: {avg_rttavg}")
+    print(f"avg rttmax: {avg_rttmax}")
+    print(f"avg rttdev: {avg_rttdev}")
 
     net.stop()
 
