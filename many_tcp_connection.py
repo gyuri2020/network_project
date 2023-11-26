@@ -16,7 +16,7 @@ class ManyTCPConnectionTopology(Topo):
 
 def iperf_client(host, server_ip, port):
     result = host.cmd(f"iperf -c {server_ip} -p {port} -t 10")
-    info(f"Host {host.name}: \n\n{result}\n\n")
+    info(result)
 
 def main():
     topo = ManyTCPConnectionTopology()
