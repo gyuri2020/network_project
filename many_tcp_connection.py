@@ -50,9 +50,11 @@ def main():
     server.cmd(f"iperf3 -s -p {server_port} &")
 
     time.sleep(5) 
+    print("Start Client iperf3")
 
     # 클라이언트들이 동시에 서버에 10초간 패킷을 전송
     for client, port in clients:
+        print(f"Client {client.name} - Port: {port}")
         thread = threading.Thread(target=iperf_client, args=(client, server_ip, port))
         threads.append(thread)
         thread.start()
