@@ -9,7 +9,7 @@ import socket
 import time
 import threading
 import re
-import numpy as np
+
 
 
 outputs = []
@@ -133,7 +133,7 @@ def main():
         if name != "server":
             client_link_util.append(link_util)
     avg_client_link_util = sum(client_link_util) / len(client_link_util)
-    std_client_link_util = np.std(np.array(client_link_util))
+    std_client_link_util = sum([(x - avg_client_link_util) ** 2 for x in client_link_util]) / len(client_link_util)
     print(f"avg client link_util: {avg_client_link_util}") #link_util
     print(f"std client link_util: {std_client_link_util}") #fairness
     net.stop()
