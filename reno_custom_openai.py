@@ -16,19 +16,6 @@ u32 tcp_reno_ssthresh(struct sock *sk)
     return max(tp->snd_cwnd >> 1U, 2U);
 }
 
-u32 tcp_custom_slow_start(struct tcp_sock *tp, u32 acked) {
-
-    u32 diff = tp->snd_ssthresh - tp->snd_cwnd;
-    u32 increase_factor = 1 + (diff / 10); 
-    u32 cwnd = min(tp->snd_cwnd + (acked * increase_factor), tp->snd_ssthresh);
-
-    acked = max(acked - (cwnd - tp->snd_cwnd), 0 );
-    tp->snd_cwnd = min(cwnd, tp->snd_cwnd_clamp);
-
-    return acked;
-}
-
-
 void tcp_reno_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 {
     struct tcp_sock *tp = tcp_sk(sk);
@@ -39,7 +26,7 @@ void tcp_reno_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 
     if (tp->snd_cwnd <= tp->snd_ssthresh) {
         /* In "slow start", cwnd is increased by the number of ACKed packets */
-        acked = tcp_custom_slow_start(tp, acked);
+        acked = tcp_slow_start(tp, acked);
         if (!acked)
             return;
     } else {
