@@ -16,15 +16,15 @@ class ManyTCPConnectionTopology(Topo):
 
 def measure_connection(net, client, server_ip):
     client_bw, server_bw = net.iperf([client, net.getNodeByName('server')], seconds=10)
+    info(f"{client} {server_bw}")    
+    # client_loss = client.cmd(f"ping -c 10 {server_ip} | grep packet | awk '{{print $6}}'")
+    # server_loss = net.getNodeByName('server').cmd(f"ping -c 10 {client.IP()} | grep packet | awk '{{print $6}}'")
     
-    client_loss = client.cmd(f"ping -c 10 {server_ip} | grep packet | awk '{{print $6}}'")
-    server_loss = net.getNodeByName('server').cmd(f"ping -c 10 {client.IP()} | grep packet | awk '{{print $6}}'")
-    
-    client_rtt = client.cmd(f"ping -c 10 {server_ip} | grep rtt | awk '{{print $4}}'")
-    server_rtt = net.getNodeByName('server').cmd(f"ping -c 10 {client.IP()} | grep rtt | awk '{{print $4}}'")
+    # client_rtt = client.cmd(f"ping -c 10 {server_ip} | grep rtt | awk '{{print $4}}'")
+    # server_rtt = net.getNodeByName('server').cmd(f"ping -c 10 {client.IP()} | grep rtt | awk '{{print $4}}'")
 
-    info(f"Client {client} to Server - Bandwidth: {client_bw}, Loss: {client_loss}, RTT: {client_rtt}")
-    info(f"Server to Client {client} - Bandwidth: {server_bw}, Loss: {server_loss}, RTT: {server_rtt}")
+    # info(f"Client {client} to Server - Bandwidth: {client_bw}, Loss: {client_loss}, RTT: {client_rtt}")
+    # info(f"Server to Client {client} - Bandwidth: {server_bw}, Loss: {server_loss}, RTT: {server_rtt}")
 
 def main():
     topo = ManyTCPConnectionTopology()
