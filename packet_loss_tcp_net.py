@@ -47,7 +47,7 @@ def ifconfigTest(node, elapsed):
 
 
 
-class ManyTCPConnectionTopology(Topo):
+class ManyPacketLossTopology(Topo):
     def build(self):
         server = self.addHost('server', cls=Host, defaultRoute=None)
         switch = self.addSwitch('s1', cls=OVSKernelSwitch, failMode='standalone')
@@ -73,7 +73,7 @@ def ping_to_server(net, client, server):
 
 
 def main():
-    topo = ManyTCPConnectionTopology()
+    topo = ManyPacketLossTopology()
     net = Mininet(topo=topo, autoSetMacs=True, build=False, ipBase="10.0.0.0/24")
 
     net.start()
